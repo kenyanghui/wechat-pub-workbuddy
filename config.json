@@ -1,0 +1,17 @@
+{
+  "_comment": "rsi-wechat-publisher 个人配置。首次使用请跑 scripts/setup_wizard.py 自动生成/更新本文件；也可手改。换知识库、改笔名、改定位都只改这里。",
+  "ima_kb_id": "",
+  "ima_kb_name": "",
+  "ima_folder_articles": "",
+  "author_name": "",
+  "wechat_account_name": "",
+  "articles_per_day": 3,
+  "theme": "default",
+  "persona": {
+    "positioning": "",
+    "target_readers": "",
+    "tone": "专业但不说教，像资深教练做一对一复盘，第二人称"
+  },
+  "topic_domains": ["请改成你的领域1", "领域2", "领域3"],
+  "hotspot_queries": ["今日AI人工智能财经热点", "36氪 AI 快讯"]
+}
