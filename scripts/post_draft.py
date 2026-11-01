@@ -167,6 +167,14 @@ def main():
         print(json.dumps({"ok": False, "error": f"封面不存在: {args.cover}"}, ensure_ascii=False))
         sys.exit(1)
 
+    # 本地图片引用检测（v1.1.0b：本地路径在公众号草稿中不显示）
+    content_preview = open(html_path, encoding="utf-8").read()
+    local_imgs = [s for s in re.findall(r'src="([^"]+)"', content_preview)
+                  if not s.startswith(("http://", "https://", "data:"))]
+    warn = ""
+    if local_imgs:
+        warn = f"HTML 含 {len(local_imgs)} 处本地图片引用（草稿中不显示，请用 wx_upload_img.py 换微信 URL）: {local_imgs[:3]}"
+
     appid_p, secret_p = os.path.join(CRED_DIR, "appid"), os.path.join(CRED_DIR, "secret")
     if not (os.path.isfile(appid_p) and os.path.isfile(secret_p)):
         print(json.dumps(local_fallback(html_path, args.cover, args.title, "凭证缺失"), ensure_ascii=False))
@@ -179,7 +187,10 @@ def main():
         thumb = upload_cover(token, args.cover)
         content = open(html_path, encoding="utf-8").read()
         media_id = add_draft(token, args.title, args.author, args.digest or args.title[:54], content, thumb)
-        print(json.dumps({"ok": True, "media_id": media_id, "mode": "api"}, ensure_ascii=False))
+        out = {"ok": True, "media_id": media_id, "mode": "api"}
+        if warn:
+            out["warning"] = warn
+        print(json.dumps(out, ensure_ascii=False))
     except Exception as e:
         errcode = getattr(e, "wx_errcode", None)
         errmsg = getattr(e, "wx_errmsg", "") or str(e)

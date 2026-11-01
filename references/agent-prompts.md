@@ -121,7 +121,7 @@ CTA 模板：{{SKILL_DIR}}/templates/format/cta.md
 2. 封面：ImageGen 生成 2.35:1（简洁无文字，贴合文章主题）→ format/imgs/cover.png；不可用 python3 PIL 兜底
 3. 压缩：bash {{SKILL_DIR}}/scripts/compress_image.sh <cover> --max-kb 500
 4. HTML：python3 {{SKILL_DIR}}/scripts/md_to_html.py article.md article.html --title <标题> --theme {{theme}}
-5. CTA：按 cta.md 在风险提示后追加（有二维码：<img src="imgs/wecom-qr.png" style="width:180px;display:block;margin:12px auto;"/>；无二维码：文字「微信搜索：{{wechat_account_name}}」）
+5. CTA：按 cta.md 在风险提示后追加。**二维码必须先上传素材库换微信 URL**：python3 {{SKILL_DIR}}/scripts/wx_upload_img.py {{SKILL_DIR}}/config/wecom-qr.png --map {{TODAY_DIR}}/p{{N}}/url_map.json（与正文配图同一流程）——本地路径 imgs/wecom-qr.png 在公众号草稿中不显示！换好后用 <img src="<微信URL>" style="width:180px;display:block;margin:12px auto;"/>；无二维码时用文字「微信搜索：{{wechat_account_name}}」
 6. 推草稿箱：python3 {{SKILL_DIR}}/scripts/post_draft.py {{TODAY_DIR}}/p{{N}}/format/article.html --cover <cover绝对路径> --title <标题> --digest <摘要> --author {{author_name}}
    （凭证缺失/失败自动降级 local-package/，不失败）
 7. 写 {{TODAY_DIR}}/p{{N}}/04_publish_queue.md（表：标题/摘要/media_id/QA分/CTA注入/待人工项）

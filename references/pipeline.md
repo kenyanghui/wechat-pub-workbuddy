@@ -111,7 +111,8 @@
 选图: python3 scripts/stock_image.py --suggest workflow|laptop|teamwork|growth|ai
 下载: python3 scripts/stock_image.py --query-id 546819,373543 --out <目录>
 上传: python3 scripts/wx_upload_img.py --map url_map.json <图片路径...>   # 图文内图必须换 wx URL
-嵌入: article.md 用 ![](url_map 中的 wx URL)；CTA 二维码仍是本地相对路径（post_draft 打包带上）
+嵌入: article.md 用 ![](url_map 中的 wx URL)
+⚠️ CTA 企微二维码同样必须上传换 URL（--map 一并入 url_map.json）——本地路径在公众号草稿中不显示（v1.1.0b 实战修复）
 ```
 
 ## manifest schema 容错（v1.1.0）
