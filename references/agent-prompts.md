@@ -114,7 +114,10 @@ CTA 模板：{{SKILL_DIR}}/templates/format/cta.md
 企微二维码：{{SKILL_DIR}}/config/wecom-qr.png（存在则用；不存在用文字兜底并在队列标注）
 
 ## 任务（按序）
-1. qa 微调后正文写 {{TODAY_DIR}}/p{{N}}/format/article.md——**所有 [配图：…] 占位必须处理**：用 ToolSearch 加载 ImageGen 逐个生成（16:9）存 format/imgs/ 并在 md 中以 ![](imgs/xxx.png) 引用；ImageGen 不可用则删除该占位段（禁止占位框进终稿）
+1. qa 微调后正文写 {{TODAY_DIR}}/p{{N}}/format/article.md——**所有 [配图：…] 占位必须处理**，配图来源优先级（用户偏好 2026-11-01：网络图优先于生图）：
+   ① **网络免费图库（首选）**：按配图描述从 Pexels/Unsplash 找高赞图——Pexels CDN 直链 `https://images.pexels.com/photos/<id>/pexels-photo-<id>.jpeg?auto=compress&cs=tinysrgb&w=1200`，下载后必须上传公众号素材库（media/uploadimg）换 wx URL 再嵌入；活动/纪实类文章优先用真实照片（用户提供或 IMA 知识库文件夹下钻获取，同样传素材库换 URL）
+   ② **ImageGen 生图（次选）**：网络图无合适时才用，16:9
+   ③ 都不可用则删除占位段（禁止占位框进终稿）；封面可用真实照片裁 2.35:1
 2. 封面：ImageGen 生成 2.35:1（简洁无文字，贴合文章主题）→ format/imgs/cover.png；不可用 python3 PIL 兜底
 3. 压缩：bash {{SKILL_DIR}}/scripts/compress_image.sh <cover> --max-kb 500
 4. HTML：python3 {{SKILL_DIR}}/scripts/md_to_html.py article.md article.html --title <标题> --theme {{theme}}
