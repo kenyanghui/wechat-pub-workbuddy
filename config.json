@@ -20,5 +20,22 @@
   "hotspot_queries": [
     "今日AI人工智能财经热点",
     "36氪 AI 快讯"
-  ]
+  ],
+  "images": {
+    "policy": "web_first",
+    "web_sources": [
+      "pexels",
+      "unsplash"
+    ],
+    "pexels_suggest_topics": [
+      "workflow",
+      "laptop",
+      "teamwork",
+      "growth",
+      "ai"
+    ],
+    "fallback_generate": true,
+    "must_upload_to_wechat": true,
+    "_comment": "v1.1.0 配图策略：网络免费图库优先于 AI 生图；纪实文用真实照片；所有配图必须上传公众号素材库（wx_upload_img.py）换 URL 嵌入"
+  }
 }

@@ -95,6 +95,29 @@
 8. 发布数据：暂无（群发后次日可跑 fetch_stats.sh）
 ```
 
+## 加急文模式（活动纪实/复盘，v1.1.0）
+
+当天活动当天发（工作坊复盘、活动纪实）**不走三翼流水线**，精简路径（2026-11-01 首期工作坊复盘实战验证）：
+
+1. **素材三源**：活动页 WebFetch 课纲 → 用户的讨论纪要/口头要点（人数/反馈基调等事实以此为准）→ IMA 真实照片（folder 逐级下钻 + get_media_info 下载，坑见 ima-api-mechanics.md）
+2. **写作**：spawn 单个 writer 子代理（提示词含全部素材要点+照片文件名清单+验收标准：字数/照片数/观点条数/归属脱敏/无真名），跳过 topic/qa
+3. **配图**：真实照片走 `python3 scripts/wx_upload_img.py --map url_map.json <照片>` 换 URL；网络配图走 `python3 scripts/stock_image.py --suggest <主题>` → `--query-id` 下载 → 同样上传换 URL；封面用现场大图 `sips` 裁 2.35:1
+4. **迭代修稿**（用户反馈后）：改 02_drafts.json → 重建 article.md（按 url_map.json 批量替换本地路径）→ md_to_html → 注入 CTA → **先删旧草稿**（draft/delete）→ 重跑 post_draft.py——草稿箱始终只有一份终版
+5. **纪律**：事实全部来自用户输入（人数/引述/时间），学员观点归属明确无真名；台账照样回写（「加急」条目）
+
+## 配图工具链（v1.1.0，网络图优先）
+
+```
+选图: python3 scripts/stock_image.py --suggest workflow|laptop|teamwork|growth|ai
+下载: python3 scripts/stock_image.py --query-id 546819,373543 --out <目录>
+上传: python3 scripts/wx_upload_img.py --map url_map.json <图片路径...>   # 图文内图必须换 wx URL
+嵌入: article.md 用 ![](url_map 中的 wx URL)；CTA 二维码仍是本地相对路径（post_draft 打包带上）
+```
+
+## manifest schema 容错（v1.1.0）
+
+archive_article.sh 已内置归一化：标准 articles 数组 / dict 直平结构（title 在顶层、media_id 在 publish 嵌套、qa 分数在 qa.score）/ 双前缀路径（format/format/article.md）均可正确解析。format 子代理仍按标准结构输出，但归档不再因结构偏差丢稿。
+
 ## 定时任务
 
 用户说「建定时」时用 automation_update：scheduleType=recurring，`FREQ=DAILY;BYHOUR=7;BYMINUTE=20`（用户可改点），prompt 复述：加载本技能 → 读 pipeline.md 执行当日九步 → 断点续跑 → 红线（绝不群发/truth-first/风险提示）→ 日报。prompt 必须自包含技能绝对路径。

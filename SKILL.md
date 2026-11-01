@@ -6,7 +6,7 @@ aliases:
   - rsi内容管线
   - 公众号AI写作
 description: RSI 自进化微信公众号内容流水线（人人可用版）。九步全自动：热点采集(WebSearch) → 素材运营(IMA知识库) → topic 选题 → writer 写作 → qa 质检 → format 排版配图 → 推草稿箱 → 归档 → 同步回 IMA。从自己的 IMA 知识库挖素材，每天产出 3 篇角度互不重复的公众号长文，全部进草稿箱由人工选择群发（绝不自动群发）。每轮回写 RSI 进化台账（素材避重/风格偏好/金句库），越用越聪明。Use when user mentions "发公众号", "公众号文章", "内容流水线", "rsi-wechat", "每天三篇", "跑流水线", "文章归档", "采集入库", "整理知识库".
-version: 1.0.0
+version: 1.1.0
 platforms: [darwin, linux]
 prerequisites:
   commands: [git, python3]
@@ -86,6 +86,9 @@ python3 scripts/setup_wizard.py
 | 跑完整流水线 / 每天三篇 | `references/pipeline.md`（九步编排手册，**执行前必读**） |
 | topic/writer/qa/format 提示词模板 | `references/agent-prompts.md`（**所有 {{占位符}} 从 config.json 取**） |
 | 只做素材采集 / 整理知识库 | pipeline.md § Step 0.7 |
+| 找配图（网络图优先） | `python3 scripts/stock_image.py --suggest <主题>` 下载 → `python3 scripts/wx_upload_img.py --map url_map.json <图>` 换 URL |
+| 修稿重发（草稿迭代） | 改 02_drafts.json/article.md → 重建 HTML+CTA → 删旧草稿(draft/delete) → 重跑 post_draft.py |
+| 发活动纪实/加急文 | pipeline.md § 加急文模式（跳过三翼，writer 单发 + 手工编排） |
 | 诊断（IP/凭证/连通性） | `python3 scripts/diagnose.py` |
 | 换企微二维码 | 直接覆盖 `config/wecom-qr.png`（文末 CTA 自动用新图） |
 | 版本/口径漂移排查 | `bash scripts/check_drift.sh` |
@@ -110,9 +113,21 @@ Step0 预热(读台账+断点续跑) → Step0.5 热点采集(WebSearch) → Ste
 3. IMA 写操作必带 folder_id（防落根目录）；凭证只放 `~/.config/`，绝不进提示词/不提交 git。
 4. Truth-first：素材不足允许减产留痕，绝不凑数发空心文。
 
-## 配图偏好（用户定稿 2026-11-01）
+## 配图偏好（用户定稿 2026-11-01，v1.1.0 工具化）
 
 **网络免费图库（Pexels/Unsplash 高赞图）优先于 AI 生图**；活动/纪实类文章优先用真实照片。所有配图必须上传公众号素材库换 URL 后嵌入（本地路径在草稿中不显示）。
+
+工具链：`stock_image.py`（--suggest 选主题 → --query-id 下载）→ `wx_upload_img.py --map url_map.json`（上传换 URL）→ article.md 重建时按 url_map 批量替换本地路径。
+
+## 加急文模式（活动纪实/复盘，v1.1.0）
+
+当天活动当天发的场景（工作坊复盘、活动纪实）**不走三翼流水线**，走精简路径：
+
+1. **素材**：活动页 WebFetch 课纲 + 用户提供讨论纪要/口头要点 + IMA 真实照片（`get_knowledge_list` 按 folder_id 逐级下钻定位文件夹——注意：直调 API 的 folder 子列表可能空返回，用 ima-mcp 工具传 folder_id 才可靠）
+2. **写作**：spawn 单个 writer（提示词给全素材要点+照片清单+验收标准），跳过 topic/qa 子代理
+3. **配图**：真实照片 `wx_upload_img.py` 换 URL + 封面用现场大图 sips 裁 2.35:1
+4. **迭代**：用户反馈修改 → 改 02_drafts.json → 重建 article.md（按 url_map 换图）→ md_to_html → 注入 CTA → **删旧草稿再推**（draft/delete + post_draft.py，避免草稿箱多版本并存）
+5. **事实纪律不变**：人数/引述/数字以用户口头为准；学员观点归属明确（「一位做XX的学员」），无真名
 
 ## 故障速查
 
@@ -141,6 +156,8 @@ rsi-wechat-publisher/
 └── scripts/                 # 全部脚本（详见各文件头注释）
     ├── setup_wizard.py      # 配置向导（首次必跑）
     ├── diagnose.py          # 一键诊断
+    ├── stock_image.py       # Pexels 网络配图下载（v1.1.0）
+    ├── wx_upload_img.py     # 图片上传公众号素材库换 URL（v1.1.0）
     ├── md_to_html.py        # 微信内联样式转换
     ├── post_draft.py        # 草稿箱推送（无群发能力）
     ├── sync_to_ima_wb.py    # 成稿回存 IMA（含COS签名）

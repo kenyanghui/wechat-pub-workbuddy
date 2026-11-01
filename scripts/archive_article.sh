@@ -64,21 +64,48 @@ try:
     data = json.load(open(mf, encoding="utf-8"))
 except Exception:
     data = []
-if isinstance(data, dict):
-    data = data.get("articles", [])
-for it in data:
-    def resolve(p, default):
-        if not p: p = default
-        if not p: return ""
-        return p if os.path.isabs(p) else os.path.normpath(os.path.join(fmt_dir, p))
-    print(json.dumps({
-        "article": resolve(it.get("article"), "article.md"),
-        "html": resolve(it.get("html"), ""),
-        "cover": resolve(it.get("cover"), "imgs/cover.png"),
+
+# schema 归一化：子代理产出的 manifest 结构多样（dict 直平/slot 包装/带 publish 嵌套），
+# 这里统一抽取为标准 articles 数组（v1.1.0：根治三轮实战中 format 子代理 manifest 非标问题）
+def normalize_item(it):
+    # publish 嵌套（media_id 可能在 it.publish.media_id）
+    mid = it.get("media_id") or ""
+    if not mid and isinstance(it.get("publish"), dict):
+        mid = it["publish"].get("media_id", "") or ""
+    # qa 分数可能在 it.qa.score
+    qa = it.get("qa_score")
+    if qa is None and isinstance(it.get("qa"), dict):
+        qa = it["qa"].get("score", "")
+    return {
+        "article": it.get("article") or it.get("article_md") or "article.md",
+        "html": it.get("html") or it.get("article_html") or "",
+        "cover": it.get("cover") or it.get("cover_path") or "imgs/cover.png",
         "title": (it.get("title") or "").strip(),
-        "media_id": (it.get("media_id") or "").strip(),
-        "qa_score": str(it.get("qa_score") or ""),
-    }, ensure_ascii=False))
+        "media_id": (mid or "").strip(),
+        "qa_score": str(qa or ""),
+    }
+
+if isinstance(data, dict):
+    arts = data.get("articles")
+    if not arts:
+        # 单篇 dict 直平结构：整份当一条
+        arts = [data]
+    data = arts
+data = [normalize_item(it) for it in data if isinstance(it, dict)]
+
+def resolve(p, default):
+    if not p: p = default
+    if not p: return ""
+    # 防双前缀：format/format/article.md → format/article.md
+    while p.startswith("format/"):
+        p = p[len("format/"):]
+    return p if os.path.isabs(p) else os.path.normpath(os.path.join(fmt_dir, p))
+
+for it in data:
+    it["article"] = resolve(it["article"], "article.md")
+    it["html"] = resolve(it["html"], "")
+    it["cover"] = resolve(it["cover"], "imgs/cover.png")
+    print(json.dumps(it, ensure_ascii=False))
 PY
 }
 
