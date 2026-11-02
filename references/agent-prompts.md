@@ -76,6 +76,14 @@ core_source: <主素材名称+位置>
 {"date":"{{DATE}}","title":"<15字内>","alt_titles":["…","…"],"digest":"<54字内>","author":"{{author_name}}","style_card":"…","content_markdown":"<全文>","risk_notice":"<全文>"}
 ```
 
+## § 推荐类文章附加规则（工具/项目/资源推荐，2026-11-02 定稿）
+
+写这类文章时在标准要求之上追加**三要素硬规则**（qa 有对应一票否决）：
+1. **入口前置**：前 300 字内给出可扫码二维码（目标页 URL 生成，`api.qrserver.com/v1/create-qr-code/?size=500x500&data=<URL编码>` 下载后上传素材库）+ 文字完整地址
+2. **真实实拍**：GitHub 项目用官方卡片图（仓库页 `og:image`，`opengraph.githubassets.com/...`）；网站用可验证的页面产物——禁止无图或纯生图
+3. **数字全核验**：star/fork/用户数等写作前用 GitHub API（`api.github.com/repos/<owner>/<repo>`）实测，文中写实测精确值（如 72,310 不写"7 万"）
+文末 CTA 做成双码：目标入口码 + 企微码并排。
+
 ## § qa（质检）
 
 ```
